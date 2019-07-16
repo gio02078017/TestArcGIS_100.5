@@ -59,15 +59,15 @@ public class MainActivity extends AppCompatActivity {
 
     private void addTrailheadsLayer() {
 
-        Portal portal = new Portal("urlbase", true);
-        UserCredential credentials = new UserCredential("usuario","password");
+        Portal portal = new Portal("URL_Base", true);
+        UserCredential credentials = new UserCredential("User","Password");
         portal.setCredential(credentials);
         portal.loadAsync();
         portal.addDoneLoadingListener(() -> {
             LicenseInfo licenseInfo = portal.getPortalInfo().getLicenseInfo();
             ArcGISRuntimeEnvironment.setLicense(licenseInfo);
         });
-        String url = "urlFeatureServer";
+        String url = "URL_Feature";
         serviceFeatureTable = new ServiceFeatureTable(url);
         serviceFeatureTable.setFeatureRequestMode(ServiceFeatureTable.FeatureRequestMode.MANUAL_CACHE);
         serviceFeatureTable.setCredential(credentials);
