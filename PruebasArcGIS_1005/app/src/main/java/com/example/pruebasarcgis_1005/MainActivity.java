@@ -45,10 +45,6 @@ public class MainActivity extends AppCompatActivity {
             double latitude = 6.234703;
             double longitude = -75.5514745;
             int levelOfDetail = 12;
-            /*Basemap.Type basemapType = Basemap.Type.TOPOGRAPHIC_VECTOR;
-            /*double latitude = 34.09042;
-            double longitude = -118.71511;
-            int levelOfDetail = 11;*/
             map = new ArcGISMap(basemapType, latitude, longitude, levelOfDetail);
             mMapView.setMap(map);
         }
@@ -64,13 +60,6 @@ public class MainActivity extends AppCompatActivity {
             LicenseInfo licenseInfo = portal.getPortalInfo().getLicenseInfo();
             ArcGISRuntimeEnvironment.setLicense(licenseInfo);
         });*/
-
-        //String url = "https://services3.arcgis.com/GVgbJbqm8hXASVYi/arcgis/rest/services/Trailheads/FeatureServer/0";
-        /*String url = "http://sampleserver6.arcgisonline.com/arcgis/rest/services/DamageAssessment/FeatureServer/0";
-        serviceFeatureTable = new ServiceFeatureTable(url);
-        featureLayer = new FeatureLayer(serviceFeatureTable);
-        map = mMapView.getMap();
-        map.getOperationalLayers().add(featureLayer);*/
 
         //String url = "https://utility.arcgis.com/usrsvcs/servers/19ba8b632aed49a3a8141dc20eb1a8ef/rest/services/Danios_Energia_PUBLICO/FeatureServer/0";
         //String url = "https://services3.arcgis.com/GVgbJbqm8hXASVYi/arcgis/rest/services/Trailheads/FeatureServer/0";
