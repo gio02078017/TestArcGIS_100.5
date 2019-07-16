@@ -52,17 +52,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void addTrailheadsLayer() {
 
-        /*Portal portal = new Portal("http://grupoepm.maps.arcgis.com", false);
-        UserCredential credentials = new UserCredential("AppEPM","4pp3pm*-");
-        portal.setCredential(credentials);
-        portal.loadAsync();
-        portal.addDoneLoadingListener(() -> {
-            LicenseInfo licenseInfo = portal.getPortalInfo().getLicenseInfo();
-            ArcGISRuntimeEnvironment.setLicense(licenseInfo);
-        });*/
-
-        //String url = "https://utility.arcgis.com/usrsvcs/servers/19ba8b632aed49a3a8141dc20eb1a8ef/rest/services/Danios_Energia_PUBLICO/FeatureServer/0";
-        //String url = "https://services3.arcgis.com/GVgbJbqm8hXASVYi/arcgis/rest/services/Trailheads/FeatureServer/0";
         String url = "http://sampleserver6.arcgisonline.com/arcgis/rest/services/DamageAssessment/FeatureServer/0";
         serviceFeatureTable = new ServiceFeatureTable(url);
         featureLayer = new FeatureLayer(serviceFeatureTable);
