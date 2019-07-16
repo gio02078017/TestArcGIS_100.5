@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     FeatureLayer featureLayer;
     ArcGISMap map;
     List<Field> fields;
+    List<FeatureType> types;
 
     private void setupMap() {
         if (mMapView != null) {
@@ -58,17 +59,26 @@ public class MainActivity extends AppCompatActivity {
 
     private void addTrailheadsLayer() {
 
-        String url = "https://services3.arcgis.com/GVgbJbqm8hXASVYi/arcgis/rest/services/Trailheads/FeatureServer/0";
-        //String url = "http://sampleserver6.arcgisonline.com/arcgis/rest/services/DamageAssessment/FeatureServer/0";
+        Portal portal = new Portal("urlbase", true);
+        UserCredential credentials = new UserCredential("usuario","password");
+        portal.setCredential(credentials);
+        portal.loadAsync();
+        portal.addDoneLoadingListener(() -> {
+            LicenseInfo licenseInfo = portal.getPortalInfo().getLicenseInfo();
+            ArcGISRuntimeEnvironment.setLicense(licenseInfo);
+        });
+        String url = "urlFeatureServer";
         serviceFeatureTable = new ServiceFeatureTable(url);
         serviceFeatureTable.setFeatureRequestMode(ServiceFeatureTable.FeatureRequestMode.MANUAL_CACHE);
-        //serviceFeatureTable.setCredential(credentials);
+        serviceFeatureTable.setCredential(credentials);
         serviceFeatureTable.addDoneLoadingListener(() ->{
             //if (serviceFeatureTable.getLoadStatus() == LoadStatus.LOADED) {
                 fields = serviceFeatureTable.getFields();
+                Toast.makeText(this, "fields "+fields.toString(), Toast.LENGTH_LONG).show();
                 if (fields != null) {
-                    List<FeatureType> types = serviceFeatureTable.getFeatureTypes();
+                    types = serviceFeatureTable.getFeatureTypes();
                     System.out.println("types " + types);
+                    Toast.makeText(this, "types "+types.toString(), Toast.LENGTH_LONG).show();
                 }
             //}
 
@@ -76,19 +86,6 @@ public class MainActivity extends AppCompatActivity {
         featureLayer = new FeatureLayer(serviceFeatureTable);
         map = mMapView.getMap();
         map.getOperationalLayers().add(featureLayer);
-        mMapView.setOnTouchListener(new DefaultMapViewOnTouchListener(this, mMapView) {
-            @Override public boolean onSingleTapConfirmed(MotionEvent event) {
-                // create a point from where the user clicked
-                android.graphics.Point point = new android.graphics.Point((int) event.getX(), (int) event.getY());
-
-                // create a map point from a point
-                Point mapPoint = mMapView.screenToLocation(point);
-
-                // add a new feature to the service feature table
-                addFeature(mapPoint, serviceFeatureTable);
-                return super.onSingleTapConfirmed(event);
-            }
-        });
     }
 
     @Override
@@ -134,79 +131,13 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    /**
-     * Adds a new Feature to a ServiceFeatureTable and applies the changes to the
-     * server.
-     *
-     * @param mapPoint     location to add feature
-     * @param featureTable service feature table to add feature
-     */
-    private void addFeature(Point mapPoint, final ServiceFeatureTable featureTable) {
-
-        // create default attributes for the feature
-        Map<String, Object> attributes = new HashMap<>();
-        attributes.put("typdamage", "Destroyed");
-        attributes.put("primcause", "Earthquake");
-
-        // creates a new feature using default attributes and point
-        Feature feature = featureTable.createFeature(attributes, mapPoint);
-
-        // check if feature can be added to feature table
-        if (featureTable.canAdd()) {
-            // add the new feature to the feature table and to server
-            featureTable.addFeatureAsync(feature).addDoneListener(() -> applyEdits(featureTable));
-        } else {
-            runOnUiThread(() -> logToUser(true, getString(R.string.error_cannot_add_to_feature_table)));
-        }
-    }
-
-    /**
-     * Sends any edits on the ServiceFeatureTable to the server.
-     *
-     * @param featureTable service feature table
-     */
-    private void applyEdits(ServiceFeatureTable featureTable) {
-
-        // apply the changes to the server
-        final ListenableFuture<List<FeatureEditResult>> editResult = featureTable.applyEditsAsync();
-        editResult.addDoneListener(() -> {
-            try {
-                List<FeatureEditResult> editResults = editResult.get();
-                // check if the server edit was successful
-                if (editResults != null && !editResults.isEmpty()) {
-                    if (!editResults.get(0).hasCompletedWithErrors()) {
-                        runOnUiThread(() -> logToUser(false, getString(R.string.feature_added)));
-                    } else {
-                        throw editResults.get(0).getError();
-                    }
-                }
-            } catch (InterruptedException | ExecutionException e) {
-                runOnUiThread(() -> logToUser(true, getString(R.string.error_applying_edits, e.getCause().getMessage())));
-            }
-        });
-    }
-
-    /**
-     * Shows a Toast to user and logs to logcat.
-     *
-     * @param isError whether message is an error. Determines log level.
-     * @param message message to display
-     */
-    private void logToUser(boolean isError, String message) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-        if (isError) {
-            Log.e(TAG, message);
-        } else {
-            Log.d(TAG, message);
-        }
-    }
-
     public void event(){
-
+        Toast.makeText(this, "fields "+fields.toString(), Toast.LENGTH_LONG).show();
         if (fields != null) {
             //FeatureType[] types = arcGISFeatureLayer.getTypes();
-            List<FeatureType> types = serviceFeatureTable.getFeatureTypes();
-            FeatureLayer getFeatureLayer = serviceFeatureTable.getFeatureLayer();
+            List<FeatureType> typeslocal = serviceFeatureTable.getFeatureTypes();
+            Toast.makeText(this, "types local "+typeslocal.toString(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "types global "+types.toString(), Toast.LENGTH_LONG).show();
             System.out.println("types " + types);
             for (FeatureType featureType : types) {
                 //if (verifyFeatureTypeDanios(hasCoberturEnergia, hasCoberturaIluminaria, featureType))
