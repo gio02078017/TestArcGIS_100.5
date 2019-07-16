@@ -11,12 +11,17 @@ import android.widget.Toast;
 
 import com.esri.arcgisruntime.ArcGISRuntimeEnvironment;
 import com.esri.arcgisruntime.LicenseInfo;
+import com.esri.arcgisruntime.arcgisservices.LabelDefinition;
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.data.Feature;
 import com.esri.arcgisruntime.data.FeatureEditResult;
+import com.esri.arcgisruntime.data.FeatureQueryResult;
 import com.esri.arcgisruntime.data.FeatureTemplate;
 import com.esri.arcgisruntime.data.FeatureType;
+import com.esri.arcgisruntime.data.Field;
 import com.esri.arcgisruntime.geometry.Point;
+import com.esri.arcgisruntime.geometry.SpatialReference;
+import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.Basemap;
 import com.esri.arcgisruntime.mapping.view.DefaultMapViewOnTouchListener;
@@ -38,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     ServiceFeatureTable serviceFeatureTable;
     FeatureLayer featureLayer;
     ArcGISMap map;
+    List<Field> fields;
 
     private void setupMap() {
         if (mMapView != null) {
@@ -52,8 +58,21 @@ public class MainActivity extends AppCompatActivity {
 
     private void addTrailheadsLayer() {
 
-        String url = "http://sampleserver6.arcgisonline.com/arcgis/rest/services/DamageAssessment/FeatureServer/0";
+        String url = "https://services3.arcgis.com/GVgbJbqm8hXASVYi/arcgis/rest/services/Trailheads/FeatureServer/0";
+        //String url = "http://sampleserver6.arcgisonline.com/arcgis/rest/services/DamageAssessment/FeatureServer/0";
         serviceFeatureTable = new ServiceFeatureTable(url);
+        serviceFeatureTable.setFeatureRequestMode(ServiceFeatureTable.FeatureRequestMode.MANUAL_CACHE);
+        //serviceFeatureTable.setCredential(credentials);
+        serviceFeatureTable.addDoneLoadingListener(() ->{
+            //if (serviceFeatureTable.getLoadStatus() == LoadStatus.LOADED) {
+                fields = serviceFeatureTable.getFields();
+                if (fields != null) {
+                    List<FeatureType> types = serviceFeatureTable.getFeatureTypes();
+                    System.out.println("types " + types);
+                }
+            //}
+
+        });
         featureLayer = new FeatureLayer(serviceFeatureTable);
         map = mMapView.getMap();
         map.getOperationalLayers().add(featureLayer);
@@ -183,9 +202,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void event(){
-        if (serviceFeatureTable.getFields() != null) {
+
+        if (fields != null) {
             //FeatureType[] types = arcGISFeatureLayer.getTypes();
             List<FeatureType> types = serviceFeatureTable.getFeatureTypes();
+            FeatureLayer getFeatureLayer = serviceFeatureTable.getFeatureLayer();
             System.out.println("types " + types);
             for (FeatureType featureType : types) {
                 //if (verifyFeatureTypeDanios(hasCoberturEnergia, hasCoberturaIluminaria, featureType))
