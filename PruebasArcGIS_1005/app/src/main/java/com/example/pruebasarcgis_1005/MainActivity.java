@@ -21,6 +21,7 @@ import com.esri.arcgisruntime.data.FeatureType;
 import com.esri.arcgisruntime.data.Field;
 import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.geometry.SpatialReference;
+import com.esri.arcgisruntime.io.RequestConfiguration;
 import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.Basemap;
@@ -67,12 +68,21 @@ public class MainActivity extends AppCompatActivity {
             LicenseInfo licenseInfo = portal.getPortalInfo().getLicenseInfo();
             ArcGISRuntimeEnvironment.setLicense(licenseInfo);
         });
+
+        RequestConfiguration request = RequestConfiguration.getGlobalRequestConfiguration();
+        request.setForcePost(true);
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put("Referer", "NameReferer");
+        request.setHeaders(headers);
+
+        credentials = UserCredential.createFromToken("Token", "Referer");
+
         String url = "URL_Feature";
         serviceFeatureTable = new ServiceFeatureTable(url);
         serviceFeatureTable.setFeatureRequestMode(ServiceFeatureTable.FeatureRequestMode.MANUAL_CACHE);
         serviceFeatureTable.setCredential(credentials);
         serviceFeatureTable.addDoneLoadingListener(() ->{
-            //if (serviceFeatureTable.getLoadStatus() == LoadStatus.LOADED) {
+            if (serviceFeatureTable.getLoadStatus() == LoadStatus.LOADED) {
                 fields = serviceFeatureTable.getFields();
                 Toast.makeText(this, "fields "+fields.toString(), Toast.LENGTH_LONG).show();
                 if (fields != null) {
@@ -80,7 +90,11 @@ public class MainActivity extends AppCompatActivity {
                     System.out.println("types " + types);
                     Toast.makeText(this, "types "+types.toString(), Toast.LENGTH_LONG).show();
                 }
-            //}
+            }else if(serviceFeatureTable.getLoadStatus() == LoadStatus.FAILED_TO_LOAD){
+                String error = "Service feature table failed to load: " + serviceFeatureTable.getLoadError().getCause();
+                System.out.println("error "+error);
+                return;
+            }
 
         });
         featureLayer = new FeatureLayer(serviceFeatureTable);
